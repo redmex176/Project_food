@@ -13,4 +13,6 @@
     
     to{opacity: 1;}
 }
-
+.menu__item {
+    text-align: center;
+}
