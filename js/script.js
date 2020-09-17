@@ -148,51 +148,48 @@ window.addEventListener("DOMContentLoaded", ()=> {
 
     //MenuCard 
 
-    class MenuCard {
-        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
-            this.src = src;
-            this.alt = alt;
-            this.title = title;
-            this.classes = classes;
-            this.descr = descr;
-            this.price = price;
-            this.transfer = 74;
-            this.changeToRub();
-            this.parent = document.querySelector(parentSelector);
+  class MenuCard {
+      constructor(src, alt, title, descr, price, parentSelector, ...classes) {
+        this.src = src;
+        this.alt = alt;
+        this.title = title;
+        this.descr = descr;
+        this.price = price;
+        this.transfer = 73;
+        this.classes = classes;
+        this.parent = document.querySelector(parentSelector);
+        this.changeToRub();
 
+      }
+      changeToRub() {
+          this.price = this.price * this.transfer;
+      }
+      renderCard() {
+          let element = document.createElement("div");
+
+        if(this.classes.length == 0 ){
+            this.classes = "menu__item";
+            element.classList.add(this.classes);
+        } else {
+            this.classes.forEach(className => {
+                element.classList.add(className);
+             });
         }
-
-        changeToRub() {
-            this.price = this.price * this.transfer;
-        }
-
-        renderCard() {
-            let element = document.createElement("div");
-
-            if (this.classes.lenght == 0) {
-                this.classes = "menu__item";
-                element.classList.add(this.classes);
-            } else {
-                this.classes.forEach(className => element.classList.add(className));
-            }
-
-            element.innerHTML = `
-        
+           
+           element.innerHTML = `
             <img src=${this.src} alt=${this.alt}>
-            <h3 class="menu__item-subtitle">${this.title}</h3>
-            <div class="menu__item-descr">${this.descr}</div>
-            <div class="menu__item-divider"></div>
-            <div class="menu__item-price">
-                <div class="menu__item-cost">Цена:</div>
-                <div class="menu__item-total"><span>${this.price}</span> руб/день</div>
-            </div>
-              
-            `;
-            this.parent.append(element);
-        }
-        
-    }
-
+          <h3 class="menu__item-subtitle">${this.title}</h3>
+          <div class="menu__item-descr">${this.descr}</div>
+          <div class="menu__item-divider"></div>
+          <div class="menu__item-price">
+              <div class="menu__item-cost">Цена:</div>
+              <div class="menu__item-total"><span>${this.price}</span> руб/день</div>
+          </div>
+          `;
+          this.parent.append(element);
+      }
+      
+  }
     new MenuCard(
         "img/tabs/vegy.jpg",
         "vegy",
@@ -200,7 +197,8 @@ window.addEventListener("DOMContentLoaded", ()=> {
         'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
         3,
         ".menu .container",
-        "menu__item",
+        
+
     ).renderCard();
 
     new MenuCard(
@@ -210,7 +208,8 @@ window.addEventListener("DOMContentLoaded", ()=> {
         'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
         5,
         ".menu .container",
-        "menu__item"
+
+
 
     ).renderCard();
 
@@ -221,9 +220,59 @@ window.addEventListener("DOMContentLoaded", ()=> {
         'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
         4,
         ".menu .container",
-        "menu__item"
+
 
     ).renderCard();
 
+    //Forms
+
+  let forms = document.querySelectorAll("form");
+
+  let message = {
+      loading: "Загрузка",
+      success: "Спасибо! Скоро мы с вами свяжемся",
+      failure: "Что-то пошло не так"
+  };
+
+  forms.forEach(item => {
+    postData(item);
+  });
+
+  function postData(form){
+    form.addEventListener("submit", (e)=> {
+        e.preventDefault();
+
+        let statusMessage = document.createElement("div");
+    statusMessage.classList.add("status");
+    statusMessage.textContent = message.loading;
+    form.append(statusMessage);
     
+    let formData = new FormData(form),
+        request = new XMLHttpRequest(),
+        object = {};
+
+    formData.forEach(function(value, key){
+        object[key] = value;
+    });
+    
+    let json = JSON.stringify(object);
+
+    request.open("POST", "server.php");
+    request.setRequestHeader("Content-type", "application/json");
+    request.send(json);
+
+    request.addEventListener("load", ()=> {
+        if (request.status === 200){
+            console.log(request.response);
+            statusMessage.textContent = message.success;
+            form.reset();
+            setTimeout(()=>{
+                statusMessage.remove();
+            },2000);
+        }else {
+            statusMessage.textContent = message.failure;
+        }
+      });
+    });
+  }
 });
