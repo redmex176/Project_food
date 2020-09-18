@@ -226,53 +226,51 @@ window.addEventListener("DOMContentLoaded", ()=> {
 
     //Forms
 
-  let forms = document.querySelectorAll("form");
+    let forms = document.querySelectorAll("form"),
+        message = {
+            loading: "Загрузка",
+            success: "Спасибо! Скоро мы с вами свяжемся",
+            failure: "Что-то полшо не так!"
+        };
 
-  let message = {
-      loading: "Загрузка",
-      success: "Спасибо! Скоро мы с вами свяжемся",
-      failure: "Что-то пошло не так"
-  };
-
-  forms.forEach(item => {
-    postData(item);
-  });
-
-  function postData(form){
-    form.addEventListener("submit", (e)=> {
-        e.preventDefault();
-
-        let statusMessage = document.createElement("div");
-    statusMessage.classList.add("status");
-    statusMessage.textContent = message.loading;
-    form.append(statusMessage);
-    
-    let formData = new FormData(form),
-        request = new XMLHttpRequest(),
-        object = {};
-
-    formData.forEach(function(value, key){
-        object[key] = value;
+    forms.forEach(item => {
+        postData(item);
     });
-    
-    let json = JSON.stringify(object);
 
-    request.open("POST", "server.php");
-    request.setRequestHeader("Content-type", "application/json");
-    request.send(json);
+    function postData (form){
+        form.addEventListener("submit", (e)=> {
+            e.preventDefault();
 
-    request.addEventListener("load", ()=> {
-        if (request.status === 200){
-            console.log(request.response);
-            statusMessage.textContent = message.success;
-            form.reset();
-            setTimeout(()=>{
-                statusMessage.remove();
-            },2000);
-        }else {
-            statusMessage.textContent = message.failure;
-        }
-      });
-    });
-  }
+            let request = new XMLHttpRequest(),
+                formData = new FormData(form),
+                object = {};
+
+            formData.forEach(function (value, key){
+                object[key] = value;
+            });
+
+            let json = JSON.stringify(object);
+
+            request.open("POST", "server.php");
+            request.setRequestHeader("Content-type", "application/json");
+            request.send(json);
+
+            let statusMessage = document.createElement("div");
+            statusMessage.classList.add("status");
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            request.addEventListener("load", ()=> {
+                if(request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    form.reset();
+                    setTimeout(()=> {
+                        statusMessage.remove();
+                    },3000);
+                }
+            });
+        });
+    } 
+  
 });
